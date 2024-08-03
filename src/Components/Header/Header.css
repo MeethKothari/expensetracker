@@ -1,29 +1,47 @@
 .container{
     background-color: #626262;
     width: 95vw;
-    height: 269px;
+    height: 370px;
     top: 94px;
     left: 32px;
     gap: 0px;
     border-radius: 10px;
-    opacity: 0px;
+    /* opacity: 0px; */
     margin: 20px;
+    display: flex;
 }
 
 .balAndExpBox{
-    display: flex;
-    flex-direction: row;
+    /* display: flex;
+    flex-direction: row; */
     /* justify-content: start; */
+    /* align-items: center;   */
     gap: 20px;
-    padding: 35px;
+    padding-top: 30px;
+    padding-left: 30px;
+    height: 270px;
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pieContainer{
+    flex-grow: 1; /* Allows the pie chart to take up remaining space */
+    height: 350px; /* Ensures it fills the height of the parent container */
+    width: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
 }
 
 .bal{
     width: 360px;
-    height: 190px;
+    height: 200px;
     gap: 0px;
     border-radius: 15px;
-    opacity: 0px;
+    /* opacity: 0px; */
     background-color: #9B9B9B;
     display: flex;
     flex-direction: column;
@@ -50,10 +68,10 @@
 
 .exp{
     width: 360px;
-    height: 190px;
+    height: 200px;
     gap: 0px;
     border-radius: 15px;
-    opacity: 0px;
+    /* opacity: 0px; */
     background-color: #9B9B9B;
     display: flex;
     flex-direction: column;

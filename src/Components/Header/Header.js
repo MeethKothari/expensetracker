@@ -4,6 +4,7 @@ import ReactModal from 'react-modal';
 import { enqueueSnackbar} from "notistack";
 import RecentTransactions from '../RecentTransactions/RecentTransactions';
 import TopExpenses from '../TopExpenses/TopExpenses';
+import PieChartDiagram from '../PieChartDiagram/PieChartDiagram';
 
 const Header = () => {
   const [balance, setBalance] = useState(()=>{
@@ -23,7 +24,7 @@ const Header = () => {
     let storedExpenses = localStorage.getItem('ExpenseCart');
     return storedExpenses ? JSON.parse(storedExpenses) : [];
   });
-
+  // state variables for edit mode
   const [editingModeOpen, setEditingModeOpen] = useState(false);
   const [editingIndexNo, setEditingIndexNo] = useState(null);
 
@@ -92,52 +93,75 @@ const closeExpModal= () => {
 
 // 2. functionalities for expenses chart  -----------------------------------------------------------------
 
-const addExpToList = () => {
-  if ( balance > expensePrice ){
-    // adding new exp to the list
-    const newExp = {
-      title: expenseTitle,
-      price: expensePrice,
-      category: expenseCategory,
-      date: expenseDate
-    }
-    // will chk if edit mode is true and also has the index of the exp that is to edit 
-    if (editingModeOpen === true && editingIndexNo !== null){
-      const oldPrice = expensesAdded[editingIndexNo].price;
-      console.log('oldPrice', oldPrice);
-      
-      const updatedExpenses = [...expensesAdded]; // take a copy of exp already in the list
-      updatedExpenses[editingIndexNo] = newExp; // assign the exp of editing exp to new exp for editing
-      setExpensesAdded(updatedExpenses); // finally append it to the exp list with edited one
-      
-      let newPrice = updatedExpenses[editingIndexNo].price;
-      console.log('newPrice', newPrice);
-      
-      // updating the balance and exp manually 
-      // declaring old price above to get initial bal and new price below after updating to get the desired value
-      if ( newPrice > oldPrice){
-        setExpense(expense + (newPrice-oldPrice));
-        setBalance(balance - (newPrice-oldPrice));
+const addExpToList = () => {  
+  // if statement holds = (edit expense logic) & else statement holds = ( add expense logic )
+  // Check if we are in editing mode
+  if (editingModeOpen === true && editingIndexNo !== null) {
+    const oldPrice = expensesAdded[editingIndexNo].price;
+    const newPrice = Number(expensePrice);
+
+    // Check if balance + old price is enough to cover the new price whenever price is getting changed in editing
+    let availableBal = balance + oldPrice; // because we need to protect negative balance so we are chking bal available with corresponding chaged amount
+    if (availableBal >= newPrice) {
+      const newExp = {           // once changed any of the value it sets a new object with updated one
+        title: expenseTitle,
+        price: newPrice,
+        category: expenseCategory,
+        date: expenseDate
+      };
+    
+      // we need to chk the bal first so once bal chkd then we can set a new obj
+      const updatedExpenses = [...expensesAdded];
+      updatedExpenses[editingIndexNo] = newExp;
+      setExpensesAdded(updatedExpenses);
+
+      // Update expense and balance accordingly to show it on the ui of wallet and expense box
+      if (newPrice > oldPrice) {
+        setExpense(expense + (newPrice - oldPrice));
+        setBalance(balance - (newPrice - oldPrice));
+      } else {
+        setExpense(expense - (oldPrice - newPrice));
+        setBalance(balance + (oldPrice - newPrice));
       }
-      if ( newPrice < oldPrice){
-        setExpense(expense - (oldPrice-newPrice));
-        setBalance(balance + (oldPrice-newPrice));
-      }
-    } 
-    else{
-      setExpensesAdded([...expensesAdded, newExp]); // copies the already added and appendes the new exp to the list
-      setExpense(expense + Number(expensePrice));
-      setBalance(balance - Number(expensePrice));
+
+      // Reset form fields
+      setExpenseTitle('');
+      setExpensePrice('');
+      setExpenseCategory('');
+      setExpenseDate('');
+      enqueueSnackbar('Expense edited successfully', { variant: 'success' });
+    } else {
+      enqueueSnackbar(`You don't have enough balance to update this expense. Please add funds to your wallet.`, { variant: 'warning' });
     }
-    setExpenseTitle('');
-    setExpensePrice('');
-    setExpenseCategory('');
-    setExpenseDate('');
-    enqueueSnackbar('Expense added successfully',{variant:'success'});
-  } else {
-    enqueueSnackbar(`you don't have enough balance, please add amount to your wallet to add expenses`,{variant:'warning'});
+  } 
+    // Logic for adding a new expense 
+  else {
+    const newPrice = Number(expensePrice);
+    if (balance >= newPrice) {
+      // sets a new object with all the fields entered while onChange event
+      const newExp = {
+        title: expenseTitle,
+        price: newPrice,
+        category: expenseCategory,
+        date: expenseDate
+      };
+
+      setExpensesAdded([...expensesAdded, newExp]);
+      setExpense(expense + newPrice);
+      setBalance(balance - newPrice);
+
+      // Reset form fields
+      setExpenseTitle('');
+      setExpensePrice('');
+      setExpenseCategory('');
+      setExpenseDate('');
+      enqueueSnackbar('Expense added successfully', { variant: 'success' });
+    } else {
+      enqueueSnackbar(`You don't have enough balance to add this expense. Please add funds to your wallet.`, { variant: 'warning' });
+    }
   }
-}
+};
+
 //console.log('expenses added', expensesAdded);
 
 
@@ -169,7 +193,10 @@ return (
             <h4>Expenses: <span style={expenseStyle}>₹{expense}</span></h4>
             <button onClick={openExpModal}>+ Add Expense</button>
         </div>
+        {/* need to add pie chart here from recharts and should be aligned with the header*/}
+        
       </div>
+      <PieChartDiagram expensesAdded={expensesAdded}/>
     </div>
   
   
@@ -224,7 +251,7 @@ return (
 <div style={{display:'flex', flexDirection:'row'}}>
 <RecentTransactions expensesAdded={expensesAdded} setExpensesAdded={setExpensesAdded} balance={balance} 
 setBalance={setBalance} expense={expense} setExpense={setExpense} editExpToList={editExpToList}/>
-<TopExpenses/>
+<TopExpenses expensesAdded={expensesAdded}/>
 </div>
 
 

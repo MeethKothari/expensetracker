@@ -1,0 +1,20 @@
+.heading{
+    font-family: ubuntu;
+    font-style: italic; 
+    color: 'rgba(255, 255, 255, 1)';
+    margin-left: 20px;
+}
+
+.topExpenses{
+    width: 30vw;
+    background-color: #ffff;
+    border-radius: 10px;
+    height: 350px;
+    /* top: 440.97px;
+    left: 32px; */
+    gap: 0px;
+    border: 1px 0px 0px 0px;
+    opacity: 0px;
+    background-color: rgba(255, 255, 255, 1);
+    margin: 20px;
+}
